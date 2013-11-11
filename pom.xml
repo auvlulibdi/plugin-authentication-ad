@@ -20,4 +20,14 @@
       <version>1.0</version>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <repository>
+        <id>repo</id>
+        <url>https://github.com/IntersectAustralia/plugin-authentication-ad/raw/master/releases</url>
+    </repository>
+    <snapshotRepository>
+        <id>snapshot-repo</id>
+        <url>https://github.com/IntersectAustralia/plugin-authentication-ad/raw/master/snapshots</url>
+    </snapshotRepository>
+</distributionManagement>
 </project>

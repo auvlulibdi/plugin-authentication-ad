@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.googlecode.the-fascinator.plugins</groupId>
+  <artifactId>plugin-authentication-active-directory</artifactId>
+  <version>1.0</version>
+  <name>Fascinator - Plugin - Authentication - Custom - Ldap</name>
+  <parent>
+    <artifactId>organisation</artifactId>
+    <groupId>com.googlecode.the-fascinator</groupId>
+    <version>1.0.3</version>
+  </parent>
+  <properties>
+    <fascinator.version>1.1.4</fascinator.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.googlecode.the-fascinator.plugins</groupId>
+      <artifactId>plugin-authentication-ldap</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
+  <distributionManagement>
+    <repository>
+        <id>repo</id>
+        <url>https://github.com/IntersectAustralia/plugin-authentication-ad/raw/master/releases</url>
+    </repository>
+    <snapshotRepository>
+        <id>snapshot-repo</id>
+        <url>https://github.com/IntersectAustralia/plugin-authentication-ad/raw/master/snapshots</url>
+    </snapshotRepository>
+</distributionManagement>
+</project>

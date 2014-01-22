@@ -573,13 +573,15 @@ public class CustomLdapAuthenticationHandler {
             if (!userRoles.contains(role)) {
                 userRoles.add(role);
                 int commaPos = role.indexOf(",");
-                String roleName = role.substring(0, commaPos);
-                String location = role.substring(commaPos+1);
-                if (location.endsWith(",")) location = location.substring(0, location.length() -1 );
-                String attrValues = performRoleSearch(location, roleName);
-                //check if role has more children                
-                if (attrValues != null) {
-                    addRole(attrValues, userRoles);
+                if (commaPos > -1   && (role.startsWith("CN")  || role.startsWith("cn"))) {
+                    String roleName = role.substring(0, commaPos);
+                    String location = role.substring(commaPos+1);
+                    if (location.endsWith(",")) location = location.substring(0, location.length() -1 );
+                    String attrValues = performRoleSearch(location, roleName);
+                    //check if role has more children                
+                    if (attrValues != null) {
+                        addRole(attrValues, userRoles);
+                    }
                 }
                 
             }

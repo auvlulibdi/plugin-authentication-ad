@@ -568,25 +568,21 @@ public class CustomLdapAuthenticationHandler {
 	}
 
 	private void addRole(String rolesString, List<String> userRoles) {
-        String[] roles = rolesString.split(" ");
+	    String[] roles = rolesString.split("CN=");
         for (String role: roles) {
-            if (!userRoles.contains(role)) {
-                userRoles.add(role);
-                int commaPos = role.indexOf(",");
-                if (commaPos > -1   && (role.startsWith("CN")  || role.startsWith("cn"))) {
-                    String roleName = role.substring(0, commaPos);
-                    String location = role.substring(commaPos+1);
-                    if (location.endsWith(",")) location = location.substring(0, location.length() -1 );
-                    String attrValues = performRoleSearch(location, roleName);
-                    //check if role has more children                
-                    if (attrValues != null) {
-                        addRole(attrValues, userRoles);
-                    }
-                }
-                
+            int commaPos = role.indexOf(",");
+            if (commaPos > -1 ) {
+                String roleName = "CN=" + role.substring(0, commaPos);
+                String location = role.substring(commaPos+1).trim();
+                userRoles.add(roleName);
+                if (location.endsWith(",")) location = location.substring(0, location.length() -1 );
+                String attrValues = performRoleSearch(location, roleName);
+                if (attrValues != null) {
+                    addRole(attrValues, userRoles);
+                }                
             }
+            
         }
-        
     }
 
     private String performRoleSearch(String location, String roleName) {

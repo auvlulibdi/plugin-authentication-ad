@@ -9,6 +9,10 @@ import java.util.Map;
 
 import javax.naming.NamingException;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +93,8 @@ import com.googlecode.fascinator.common.JsonSimpleConfig;
  */
 public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements Roles {
     private static final String PLUGIN_ID = "activedirectory";
+    private Cache userCache;
+    private Cache credentialCache;
 	/** Logging **/
 	@SuppressWarnings("unused")
 	private final Logger log = LoggerFactory
@@ -147,7 +153,13 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 			throw new AuthenticationException(ioe);
 		}
 	}
-
+	private void buildCache() {
+	    CacheManager singletonManager = CacheManager.create();
+	    userCache = new Cache("userCache", 500, false, false, 3600, 1800);
+	    singletonManager.addCache(userCache);
+	    credentialCache = new Cache("credentialCache", 500, false, false, 3600, 1800);
+        singletonManager.addCache(credentialCache);
+	}
 	/**
 	 * Set default configuration
 	 * 
@@ -157,6 +169,7 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 	 *             if fails to initialise
 	 */
 	private void setConfig(JsonSimpleConfig config) throws IOException {
+	    buildCache();
 		user_object = new LDAPUser();
 		String url = config.getString(null, "authentication", PLUGIN_ID, "baseURL");
 		String baseDN = config.getString(null, "authentication", PLUGIN_ID, "baseDN");
@@ -198,11 +211,18 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 	@Override
 	public User logIn(String username, String password)
 			throws AuthenticationException {
+	    User user = null;
 		// Check to see if users authorised.
 		try {
+		    Element userObject = userCache.get(username); 
+		    if  (userObject != null) {
+		        return (User)userObject.getObjectValue();
+		    }
 			if (ldapAuth.authenticate(username, password)) {
 				// Return a user object.
-				return getUser(username);
+			    user = getUser(username);
+			    userCache.put(new Element(username, user));
+			    return getUser(username);
 			} else {
 				throw new AuthenticationException(
 						"Invalid password or username.");
@@ -237,7 +257,8 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 	@Override
 	public User getUser(String username) throws AuthenticationException {
 		// Get a new user object and try to find the users common name
-		user_object = new LDAPUser();
+		//cache user
+	    user_object = new LDAPUser();
 		String cn = ldapAuth.getAttr(username, "cn");
 		if (cn.equals("")) {
 			// Initialise the user with displayname the same as the username
@@ -258,7 +279,16 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
      */
     @Override
     public String[] getRoles(String username) {
-            return getAuthenticationHandler().getRoles(username).toArray(new String[] {});
+            //cache roles
+            Element rolesElement = credentialCache.get(username);
+            
+            if (rolesElement != null) {
+                return  (String[])rolesElement.getObjectValue();
+                
+            }
+            String[] roles = getAuthenticationHandler().getRoles(username).toArray(new String[] {}); 
+            credentialCache.put(new Element(username, roles));
+            return roles ;
     }
 
     /**

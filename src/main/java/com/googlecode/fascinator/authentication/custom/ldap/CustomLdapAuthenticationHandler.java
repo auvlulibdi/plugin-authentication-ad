@@ -74,7 +74,7 @@ public class CustomLdapAuthenticationHandler {
 	private final static String LDAP_PASSWORD_REGEX = "\\{(.+)\\}(.+)";
 
     private final static Pattern LDAP_PASSWORD_PATTERN = Pattern.compile(LDAP_PASSWORD_REGEX);
-    private Cache credentialCache;
+    private static Cache credentialCache;
     /** LDAP environment */
 	private Hashtable<String, String> env;
 
@@ -148,10 +148,13 @@ public class CustomLdapAuthenticationHandler {
 		this.ldapRoleAttr = ldapRoleAttr;
 		this.baseUrl = baseUrl;
 		this.ldapSecurityPrincipal = ldapSecurityPrincipal;
-		this.ldapSecurityCredentials = ldapSecurityCredentials;
-		CacheManager singletonManager = CacheManager.create();
-		credentialCache = new Cache("credentialCache", 500, false, false, 3600, 1800);
-        singletonManager.addCache(credentialCache);
+		this.ldapSecurityCredentials = ldapSecurityCredentials;		
+		if (CustomLdapAuthenticationHandler.credentialCache == null) {
+		    CacheManager singletonManager = CacheManager.create();
+		    CustomLdapAuthenticationHandler.credentialCache = new Cache("credentialCache", 500, false, false, 3600, 1800);
+		    singletonManager.addCache(CustomLdapAuthenticationHandler.credentialCache);
+		}
+        
 		// Initialise the LDAP environment
 		env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
@@ -552,7 +555,7 @@ public class CustomLdapAuthenticationHandler {
 	public List<String> getRoles(String username) {
 	    //cache roles
         
-	    Element rolesElement = credentialCache.get(username);
+	    Element rolesElement = CustomLdapAuthenticationHandler.credentialCache.get(username);
         
         if (rolesElement != null) {
             return  (List<String>)rolesElement.getObjectValue();
@@ -577,7 +580,7 @@ public class CustomLdapAuthenticationHandler {
                 roles.addAll(roleList);
             }
         }
-	    credentialCache.put(new Element(username, new ArrayList<String>(roles)));
+	    CustomLdapAuthenticationHandler.credentialCache.put(new Element(username, new ArrayList<String>(roles)));
 	    return new ArrayList<String>(roles);
 	}
 

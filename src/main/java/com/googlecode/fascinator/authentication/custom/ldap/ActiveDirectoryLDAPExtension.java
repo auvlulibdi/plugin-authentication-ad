@@ -93,7 +93,7 @@ import com.googlecode.fascinator.common.JsonSimpleConfig;
  */
 public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements Roles {
     private static final String PLUGIN_ID = "activedirectory";
-    private Cache userCache;
+    private static Cache userCache;
 	/** Logging **/
 	@SuppressWarnings("unused")
 	private final Logger log = LoggerFactory
@@ -152,10 +152,12 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 			throw new AuthenticationException(ioe);
 		}
 	}
-	private void buildCache() {
-	    CacheManager singletonManager = CacheManager.create();
-	    userCache = new Cache("userCache", 500, false, false, 3600, 1800);
-	    singletonManager.addCache(userCache);
+	private void buildCache() {	    
+	    if (ActiveDirectoryLDAPExtension.userCache == null) {
+	        CacheManager singletonManager = CacheManager.create();
+	        ActiveDirectoryLDAPExtension.userCache = new Cache("userCache", 500, false, false, 3600, 1800);
+	        singletonManager.addCache(ActiveDirectoryLDAPExtension.userCache);
+	    }	    
 	}
 	/**
 	 * Set default configuration
@@ -211,14 +213,14 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 	    User user = null;
 		// Check to see if users authorised.
 		try {
-		    Element userObject = userCache.get(username); 
+		    Element userObject = ActiveDirectoryLDAPExtension.userCache.get(username); 
 		    if  (userObject != null) {
 		        return (User)userObject.getObjectValue();
 		    }
 			if (ldapAuth.authenticate(username, password)) {
 				// Return a user object.
 			    user = getUser(username);
-			    userCache.put(new Element(username, user));
+			    ActiveDirectoryLDAPExtension.userCache.put(new Element(username, user));
 			    return getUser(username);
 			} else {
 				throw new AuthenticationException(

@@ -40,6 +40,10 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +74,7 @@ public class CustomLdapAuthenticationHandler {
 	private final static String LDAP_PASSWORD_REGEX = "\\{(.+)\\}(.+)";
 
     private final static Pattern LDAP_PASSWORD_PATTERN = Pattern.compile(LDAP_PASSWORD_REGEX);
-
+    private Cache credentialCache;
     /** LDAP environment */
 	private Hashtable<String, String> env;
 
@@ -138,13 +142,16 @@ public class CustomLdapAuthenticationHandler {
 	public CustomLdapAuthenticationHandler(String baseUrl, String baseDn,
 			String ldapSecurityPrincipal, String ldapSecurityCredentials,
 			String ldapRoleAttr, String idAttr) {
-		// Set public variables
-		this.baseDn = baseDn;
+		// Set public variables		
+	    this.baseDn = baseDn;
 		this.idAttr = idAttr;
 		this.ldapRoleAttr = ldapRoleAttr;
 		this.baseUrl = baseUrl;
 		this.ldapSecurityPrincipal = ldapSecurityPrincipal;
 		this.ldapSecurityCredentials = ldapSecurityCredentials;
+		CacheManager singletonManager = CacheManager.create();
+		credentialCache = new Cache("credentialCache", 500, false, false, 3600, 1800);
+        singletonManager.addCache(credentialCache);
 		// Initialise the LDAP environment
 		env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
@@ -543,7 +550,13 @@ public class CustomLdapAuthenticationHandler {
 	 */
 	
 	public List<String> getRoles(String username) {
-	    
+	    //cache roles
+        
+	    Element rolesElement = credentialCache.get(username);
+        
+        if (rolesElement != null) {
+            return  (List<String>)rolesElement.getObjectValue();
+        }
 	    Set<String> roles = new LinkedHashSet<String>();
 	    List<String> attrValues = getAllAttrs(username, ldapRoleAttr);
 	    
@@ -564,6 +577,7 @@ public class CustomLdapAuthenticationHandler {
                 roles.addAll(roleList);
             }
         }
+	    credentialCache.put(new Element(username, new ArrayList<String>(roles)));
 	    return new ArrayList<String>(roles);
 	}
 

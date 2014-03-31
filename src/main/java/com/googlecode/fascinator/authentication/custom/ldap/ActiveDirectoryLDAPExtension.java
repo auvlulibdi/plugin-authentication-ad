@@ -94,7 +94,6 @@ import com.googlecode.fascinator.common.JsonSimpleConfig;
 public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements Roles {
     private static final String PLUGIN_ID = "activedirectory";
     private Cache userCache;
-    private Cache credentialCache;
 	/** Logging **/
 	@SuppressWarnings("unused")
 	private final Logger log = LoggerFactory
@@ -157,8 +156,6 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
 	    CacheManager singletonManager = CacheManager.create();
 	    userCache = new Cache("userCache", 500, false, false, 3600, 1800);
 	    singletonManager.addCache(userCache);
-	    credentialCache = new Cache("credentialCache", 500, false, false, 3600, 1800);
-        singletonManager.addCache(credentialCache);
 	}
 	/**
 	 * Set default configuration
@@ -279,15 +276,7 @@ public class ActiveDirectoryLDAPExtension extends LDAPAuthentication implements 
      */
     @Override
     public String[] getRoles(String username) {
-            //cache roles
-            Element rolesElement = credentialCache.get(username);
-            
-            if (rolesElement != null) {
-                return  (String[])rolesElement.getObjectValue();
-                
-            }
-            String[] roles = getAuthenticationHandler().getRoles(username).toArray(new String[] {}); 
-            credentialCache.put(new Element(username, roles));
+            String[] roles = getAuthenticationHandler().getRoles(username).toArray(new String[] {});            
             return roles ;
     }
 

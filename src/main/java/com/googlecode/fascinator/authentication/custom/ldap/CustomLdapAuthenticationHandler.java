@@ -503,7 +503,7 @@ public class CustomLdapAuthenticationHandler {
 			ne.close();
 			dc.close();
 		} catch (NamingException ne) {
-			log.warn("Failed LDAP lookup getAllAttrs" + username, ne);
+			log.warn("Failed LDAP lookup getAllAttrs (cja)" + username, ne);
 		}
 
 		log.trace("getAllAttrs search result: " + resultList);

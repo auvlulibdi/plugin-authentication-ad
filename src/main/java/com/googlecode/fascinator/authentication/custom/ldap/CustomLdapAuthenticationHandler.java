@@ -273,7 +273,7 @@ public class CustomLdapAuthenticationHandler {
 			ctx.close();
 			return true;
 		} catch (NamingException ne) {
-			log.warn("Failed LDAP lookup doAuthenticate", ne);
+			log.warn("Failed LDAP lookup doAuthenticate (cja)", ne);
 		}
 		return false;
 	}
@@ -470,7 +470,7 @@ public class CustomLdapAuthenticationHandler {
 			ne.close();
 			dc.close();
 		} catch (NamingException ne) {
-			log.warn("Failed LDAP lookup getAttr", ne);
+			log.warn("Failed LDAP lookup getAttr (cja)", ne);
 			log.warn("username:", username);
 			log.warn("attrName:", attrName);
 		}

@@ -71,10 +71,10 @@
       <url>http://ltudiginf:8081/nexus/content/repositories/releases/</url>
     </repository>
 
-</distributionManagement>
+  </distributionManagement>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com/auvlulibdi/.git</connection>
+    <connection>scm:git:ssh://git@github.com/auvlulibdi/plugin-authentication-ad.git</connection>
   </scm>
 
 

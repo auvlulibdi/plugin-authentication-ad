@@ -25,7 +25,31 @@
       <version>2.3.2</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- 20140805 : cja : http://axelfontaine.com/blog/final-nail.html : start -->
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.1</version>
+      </plugin>
+      <plugin>
+          <artifactId>maven-scm-plugin</artifactId>
+          <version>1.8.1</version>
+          <configuration>
+              <tag>${project.artifactId}-${project.version}</tag>
+              <!-- <tag>TestCJA.10</tag> -->
+          </configuration>
+      </plugin>
+      <!-- 20140805 : cja : http://axelfontaine.com/blog/final-nail.html : stop -->
+
+    </plugins>
+  </build>
+
   <distributionManagement>
+
+<!--
     <repository>
         <id>repo</id>
         <url>https://github.com/IntersectAustralia/plugin-authentication-ad/raw/master/releases</url>
@@ -34,5 +58,26 @@
         <id>snapshot-repo</id>
         <url>https://github.com/IntersectAustralia/plugin-authentication-ad/raw/master/snapshots</url>
     </snapshotRepository>
+-->
+
+    <snapshotRepository>
+      <id>nexus-ltu</id>
+      <name>Nexus Snapshots LTU</name>
+      <url>http://ltudiginf:8081/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>nexus-ltu</id>
+      <name>Nexus Releases LTU</name>
+      <url>http://ltudiginf:8081/nexus/content/repositories/releases/</url>
+    </repository>
+
 </distributionManagement>
+
+  <scm>
+    <connection>scm:git:ssh://git@github.com/auvlulibdi/.git</connection>
+  </scm>
+
+
+
+
 </project>
